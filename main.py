@@ -100,22 +100,27 @@ def get_annual_data(StationID, Prov, Year, verbose):
 
 
 def main(StationID, Province, fromYear, toYear, verbose=False):
-    rows = []
-    yearsRange = list(range(fromYear, toYear + 1))
-    years_to_present = []
-    for Year in yearsRange:
-        row = get_annual_data(StationID, Province, Year, verbose)
-        if row != None:
-            years_to_present.append(Year)
-            rows.append(row)
-       
-  
-    
-    columns = 'snowy days', 'tot rain (mm)', 'tot snowfall (cm)', 'tot percip', 'full data?'
-    df = pd.DataFrame(data=rows, index=years_to_present, columns=columns)
-    df.loc['average'] = df.mean(numeric_only=True)
+    if not os.path.exists("./data"):
+        os.makedirs("./data")
 
-    return df
+    csv_path = "./data/{}_{}.csv".format(StationID, Province)
+
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path,index_col=0)
+    else:
+        columns = ['snowy days', 'tot rain (mm)', 'tot snowfall (cm)', 'tot percip', 'full data?']
+        df = pd.DataFrame(columns=columns)
+    yearsRange = list(range(fromYear, toYear + 1))
+    for Year in yearsRange:
+        if Year not in df.index:
+            row = get_annual_data(StationID, Province, Year, verbose)
+            if row != None:
+                df.loc[Year] = row
+    df.to_csv(csv_path)
+    df.loc['average'] = df.mean(numeric_only=True)
+    return df.loc[yearsRange]
+   
+
 
 ###############################################################
 
