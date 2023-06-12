@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import os
 
 
 def get_num_from_string(s):
